@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Maki Archive - Maki Veritas</title>
+  <link rel="stylesheet" href="shared/ui.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.10/dist/browser/pixi.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi-spine@3.0.7/dist/pixi-spine.umd.js"></script>
+</head>
+<body>
+  <div id="splash-screen">
+    <img src="assets/maki-home/logo.png" id="splash-logo" alt="Logo Game">
+    <div id="splash-text">- Click Anywhere to Start -</div>
+  </div>
+  <button id="btn-nav-camp">
+    <i class="fa-solid fa-tent"></i>
+  </button>
+  <button id="btn-subtitle">
+    <i id="icon-subtitle" class="fa-solid fa-comment"></i>
+  </button>
+  <div id="kotak-subtitle">
+    <span id="teks-subtitle"></span>
+  </div>
+  <script src="shared/ui-utils.js"></script>
+  <script>
+    // KONFIGURASI HALAMAN INI
+    const CONFIG = {
+      // Spine assets
+      skel  : "assets/maki-home/Maki_home.skel",
+      atlas : "assets/maki-home/Maki_home.atlas",
+      // BGM
+      bgm   : "assets/maki-home/bgm.ogg",
+      // Posisi & Skala karakter
+      zoom          : 0.8,
+      geserAtasBawah: 650,   // maki.y = (height/2) + nilai ini
+      // Hitbox kepala
+      hitboxRadius     : 300,
+      hitboxX          : -200,
+      hitboxY          : -2450,
+      // Posisi balon subtitle relatif dari hitbox
+      balonX : 400,
+      balonY : 0,
+      // Nama bone di skeleton
+      namaTulangKepala : "Head",
+      namaTulangLeher  : "neck",
+      // Dialog / Timeline
+      timeline: [
+        {
+          animBody: "Talk_01_M", animFace: "Talk_01_A",
+          suara: [
+            { file: "assets/maki-home/talk_1_1.ogg", jedaAwal: 1800, teks: "So, is this good enough?" },
+            { file: "assets/maki-home/talk_1_2.ogg", jedaAwal: 1000, teks: "What do you think, Sensei?" }
+          ]
+        },
+        {
+          animBody: "Talk_02_M", animFace: "Talk_02_A",
+          suara: [
+            { file: "assets/maki-home/talk_2_1.ogg", jedaAwal: 500,  teks: "Hmph... At least try to look impressed." },
+            { file: "assets/maki-home/talk_2_2.ogg", jedaAwal: 1500, teks: "I need you to give me feedback like a professional art critic!" }
+          ]
+        },
+        {
+          animBody: "Talk_03_M", animFace: "Talk_03_A",
+          suara: [
+            { file: "assets/maki-home/talk_3_1.ogg", jedaAwal: 600,  teks: "So what did you paint, Sensei?" },
+            { file: "assets/maki-home/talk_3_2.ogg", jedaAwal: 1000, teks: "Uh..." },
+            { file: "assets/maki-home/talk_3_3.ogg", jedaAwal: 950,  teks: "Hahaha! What is that supposed to be? It looks so silly!" }
+          ]
+        },
+        {
+          animBody: "Talk_04_M", animFace: "Talk_04_A",
+          suara: [
+            { file: "assets/maki-home/talk_4_1.ogg", jedaAwal: 800,  teks: "Aren't I scared of heights?" },
+            { file: "assets/maki-home/talk_4_2.ogg", jedaAwal: 1200, teks: "Not when I have you by my side." }
+          ]
+        },
+        {
+          animBody: "Talk_05_M", animFace: "Talk_05_A",
+          suara: [
+            { file: "assets/maki-home/talk_5_1.ogg", jedaAwal: 800,  teks: "And I'll be by yours whenever you need me." },
+            { file: "assets/maki-home/talk_5_2.ogg", jedaAwal: 1000, teks: "The wall, Sensei. I'll paint anything if it's for you!" }
+          ]
+        }
+      ]
+    };
+
+    // INIT PIXI + SPINE (v6 style: Loader)
+    const app = new PIXI.Application({
+      resizeTo         : window,
+      backgroundAlpha  : 0,
+      antialias        : true,
+      premultipliedAlpha: true,
+    });
+    // Canvas di-insert SEBELUM elemen UI lain supaya tidak menindih splash/tombol
+    app.view.style.position = "absolute";
+    app.view.style.top      = "0";
+    app.view.style.left     = "0";
+    app.view.style.zIndex   = "0";
+    document.body.insertBefore(app.view, document.body.firstChild);
+
+    const bgm = new Audio(CONFIG.bgm);
+    bgm.loop   = true;
+    bgm.volume = 0.3;
+
+    const loader = new PIXI.Loader();
+    loader.add("maki", CONFIG.skel, {
+      xhrType : PIXI.LoaderResource.XHR_RESPONSE_TYPE.BUFFER,
+      metadata: { spineAtlasFile: CONFIG.atlas }
+    });
+
+    loader.load((ldr, res) => {
+      const spineData = res.maki?.spineData;
+      if (!spineData) { console.error("Gagal load Spine data"); return; }
+
+      const maki = new PIXI.spine.Spine(spineData);
+      maki.autoUpdate = true;
+      app.stage.addChild(maki);
+
+      // Posisi karakter
+      function aturPosisi() {
+        const skala = app.renderer.height / 1080;
+        maki.scale.set(skala * CONFIG.zoom);
+        maki.x = app.renderer.width  / 2;
+        maki.y = (app.renderer.height / 2) + CONFIG.geserAtasBawah;
+      }
+      aturPosisi();
+      window.addEventListener("resize", () => {
+        app.renderer.resize(window.innerWidth, window.innerHeight);
+        aturPosisi();
+      });
+
+      // Animasi awal
+      maki.stateData.defaultMix = 0.2;
+      maki.state.setAnimation(0, "Start_Idle_01", false);
+      maki.state.addAnimation(0, "Idle_01", true, 0);
+
+      // UI Bersama
+      const ui = buatUI(maki, app, CONFIG);
+      // Daftarkan ticker
+      app.ticker.add(ui.tickerUpdate);
+      // Canvas events (gunakan app.view untuk Spine v6)
+      ui.pasangEventCanvas(app.view);
+      // Cek dua flag secara independen
+      const sudahPernah  = sessionStorage.getItem("sudah_masuk");
+      const adaBGMResume = sessionStorage.getItem("bgm_resume");
+
+      if (sudahPernah) {
+        // Kunjungan ke-2 dst atau balik dari camp -> sembunyikan splash
+        const splash = document.getElementById("splash-screen");
+        if (splash) splash.style.display = "none";
+
+        if (adaBGMResume) {
+          // Ada data fade dari camp -> fade in
+          ui.resumeBGM(bgm);
+        } else {
+          // Tidak ada data resume (misal refresh biasa) -> langsung play normal
+          bgm.play().catch(() => {});
+        }
+      } else {
+        // Kunjungan pertama -> tampilkan splash, set flag saat diklik
+        ui.pasangSplash(bgm, true, () => {
+          sessionStorage.setItem("sudah_masuk", "1");
+        });
+      }
+      // ── Tombol Navigasi ke Camp ──────────────────────────────
+      document.getElementById("btn-nav-camp").addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        ui.navigasiDenganFade(bgm, "camp.html");
+      });
+    });
+  </script>
+</body>
+</html>

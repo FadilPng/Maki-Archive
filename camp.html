@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Maki Archive - Maki Camp</title>
+    <link rel="stylesheet" href="shared/ui.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@8/dist/pixi.min.js"></script>
+    <script src="https://unpkg.com/@esotericsoftware/spine-pixi-v8@4.2.*/dist/iife/spine-pixi-v8.js"></script>
+  </head>
+  <body>
+    <div id="splash-screen" style="display: none"></div>
+    <button id="btn-nav-home">
+      <i class="fa-solid fa-house"></i>
+    </button>
+    <button id="btn-subtitle">
+      <i id="icon-subtitle" class="fa-solid fa-comment"></i>
+    </button>
+    <div id="kotak-subtitle">
+      <span id="teks-subtitle"></span>
+    </div>
+    <div id="loading-info">Initializing...</div>
+
+    <script src="shared/ui-utils.js"></script>
+    <script>
+      // KONFIGURASI HALAMAN INI
+      const CONFIG = {
+        // Spine assets
+        skel: "assets/maki-camp/CH0235_home.skel",
+        atlas: "assets/maki-camp/CH0235_home.atlas",
+        // BGM
+        bgm: "assets/maki-camp/bgm_camp.ogg",
+        // Posisi & Skala karakter
+        zoom: 0.65,
+        geserAtasBawah: 500,
+        // Hitbox kepala
+        hitboxRadius: 500,
+        hitboxX: 50,
+        hitboxY: -2400,
+        // Posisi balon subtitle
+        balonX: 600,
+        balonY: 400,
+        // Nama bone di skeleton
+        namaTulangKepala: "Head_Rot",
+        namaTulangLeher: "Neck_Rot",
+        // Dialog / Timeline
+        timeline: [
+          {
+            animBody: "Talk_01_M",
+            animFace: "Talk_01_A",
+            suara: [
+              {
+                file: "assets/maki-camp/camp_1_1.ogg",
+                jedaAwal: 500,
+                teks: "U-Ughhh...",
+              },
+              {
+                file: "assets/maki-camp/camp_1_2.ogg",
+                jedaAwal: 1700,
+                teks: "I died at the same spot again...",
+              },
+            ],
+          },
+          {
+            animBody: "Talk_02_M",
+            animFace: "Talk_02_A",
+            suara: [
+              {
+                file: "assets/maki-camp/camp_2_1.ogg",
+                jedaAwal: 900,
+                teks: "Mhm. Using this controller is harder than I expected...",
+              },
+              {
+                file: "assets/maki-camp/camp_2_2.ogg",
+                jedaAwal: 1400,
+                teks: "I'm on the final boss......but I keep making the same mistakes over and over again.",
+              },
+            ],
+          },
+          {
+            animBody: "Talk_03_M",
+            animFace: "Talk_03_A",
+            suara: [
+              {
+                file: "assets/maki-camp/camp_3_1.ogg",
+                jedaAwal: 800,
+                teks: "Yeah, but these controls are making it super hard...And now my competitive spirit has risen to the challenge.",
+              },
+              {
+                file: "assets/maki-camp/camp_3_2.ogg",
+                jedaAwal: 700,
+                teks: "And because there's no distractions here......I feel like I can really focus on just the game.",
+              },
+              {
+                file: "assets/maki-camp/camp_3_3.ogg",
+                jedaAwal: 700,
+                teks: "Could this be the joy in camping that everyone always talks about?",
+              },
+            ],
+          },
+          {
+            animBody: "Talk_04_M",
+            animFace: "Talk_04_A",
+            suara: [
+              {
+                file: "assets/maki-camp/camp_4.ogg",
+                jedaAwal: 1000,
+                teks: "Ah, it's already that late? What do I do...?",
+              },
+            ],
+          },
+          {
+            animBody: "Talk_05_M",
+            animFace: "Talk_05_A",
+            suara: [
+              {
+                file: "assets/maki-camp/camp_5.ogg",
+                jedaAwal: 1000,
+                teks: "Sensei, this really, truly is my last try...So please wait just a little longer!",
+              },
+            ],
+          },
+        ],
+      };
+      // INIT PIXI + SPINE (v8 style: async/await)
+      const loadInfo = document.getElementById("loading-info");
+      const bgm = new Audio(CONFIG.bgm);
+      bgm.loop = true;
+      bgm.volume = 0.3;
+      async function main() {
+        try {
+          // Inisialisasi PIXI v8
+          const app = new PIXI.Application();
+          await app.init({
+            resizeTo: window,
+            background: 0x000000,
+            antialias: true,
+            premultipliedAlpha: true,
+          });
+
+          document.body.insertBefore(app.canvas, document.body.firstChild);
+          app.canvas.style.cssText = "position:absolute;top:0;left:0;";
+
+          // Load Spine assets
+          loadInfo.textContent = "Loading character...";
+          PIXI.Assets.add({ alias: "makiAtlas", src: CONFIG.atlas });
+          PIXI.Assets.add({ alias: "makiSkel", src: CONFIG.skel });
+          await PIXI.Assets.load(["makiAtlas", "makiSkel"]);
+
+          // Buat karakter Spine
+          const maki = spine.Spine.from({
+            skeleton: "makiSkel",
+            atlas: "makiAtlas",
+          });
+          maki.autoUpdate = true;
+          app.stage.addChild(maki);
+
+          // Posisi karakter
+          function aturPosisi() {
+            const skala = app.renderer.height / 1080;
+            maki.scale.set(skala * CONFIG.zoom);
+            maki.x = app.renderer.width / 2;
+            maki.y = app.renderer.height / 2 + CONFIG.geserAtasBawah;
+          }
+          aturPosisi();
+          window.addEventListener("resize", () => {
+            app.renderer.resize(window.innerWidth, window.innerHeight);
+            aturPosisi();
+          });
+
+          // Animasi awal
+          maki.state.data.defaultMix = 0.2;
+          maki.state.setAnimation(0, "Start_Idle_01", false);
+          maki.state.addAnimation(0, "Idle_01", true, 0);
+
+          //UI Bersama
+          const ui = buatUI(maki, app, CONFIG);
+          // Daftarkan ticker
+          app.ticker.add(ui.tickerUpdate);
+          // Canvas events
+          ui.pasangEventCanvas(app.canvas);
+          // Sembunyikan splash
+          ui.pasangSplash(null, false);
+          // Coba resume BGM dari index (fade in otomatis)
+          // Kalau gagal (misalnya buka camp langsung) -> tunggu klik pertama
+          const adaResume = ui.resumeBGM(bgm);
+          if (!adaResume) {
+            app.canvas.addEventListener(
+              "pointerdown",
+              () => {
+                bgm.play().catch(() => {});
+              },
+              { once: true }
+            );
+          }
+
+          //Tombol Navigasi ke Home
+          document
+            .getElementById("btn-nav-home")
+            .addEventListener("pointerdown", (e) => {
+              e.stopPropagation();
+              ui.navigasiDenganFade(bgm, "index.html");
+            });
+
+          loadInfo.style.display = "none";
+        } catch (err) {
+          console.error("Gagal load:", err);
+          loadInfo.textContent = "Gagal load. Cek console.";
+        }
+      }
+
+      window.addEventListener("load", () => main());
+    </script>
+  </body>
+</html>

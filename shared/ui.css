@@ -1,0 +1,161 @@
+/* shared/ui.css
+   CSS bersama untuk semua halaman karakter */
+
+/* Reset & Base */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    cursor: pointer;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+  }
+  
+  /* SPLASH SCREEN */
+  #splash-screen {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: opacity 0.5s ease;
+  }
+  
+  #splash-logo {
+    max-width: 800px;
+    margin-bottom: 30px;
+  }
+  
+  #splash-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 20px;
+    letter-spacing: 2px;
+    animation: kelapKelip 1.5s infinite;
+  }
+  
+  @keyframes kelapKelip {
+    0%, 100% { opacity: 0.3; }
+    50%       { opacity: 1;   }
+  }
+  
+  /* TOMBOL SUBTITLE  */
+  #btn-subtitle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+    transition: all 0.2s ease;
+  }
+  
+  #btn-subtitle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+  
+  #btn-subtitle.off {
+    color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* TOMBOL NAVIGASI  */
+  #btn-nav-camp,
+  #btn-nav-home {
+    position: fixed;
+    top: 20px;
+    right: 75px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+    transition: all 0.2s ease;
+  }
+  
+  #btn-nav-camp:hover,
+  #btn-nav-home:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+  
+  /* SPEECH BUBBLE / BALON SUBTITLE */
+  #kotak-subtitle {
+    position: fixed;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    padding: 15px 25px;
+    border-radius: 18px;
+    font-size: 18px;
+    font-weight: 600;
+    max-width: 350px;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+  }
+  
+  #kotak-subtitle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -14px;
+    transform: translateY(-50%);
+    border-width: 10px 15px 10px 0;
+    border-style: solid;
+    border-color: transparent rgba(255, 255, 255, 0.95) transparent transparent;
+  }
+  
+  #kotak-subtitle.show {
+    opacity: 1;
+  }
+  
+  /* LOADING INFO */
+  #loading-info {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+    z-index: 9998;
+  }
