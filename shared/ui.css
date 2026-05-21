@@ -30,7 +30,9 @@
   #splash-screen {
     position: fixed;
     inset: 0;
-    background: #000;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     z-index: 9999;
     display: flex;
     flex-direction: column;
@@ -159,3 +161,70 @@
     font-size: 13px;
     z-index: 9998;
   }
+
+  /* =====================================================
+   OVERLAY PUTAR HP (muncul saat portrait di mobile)
+   ===================================================== */
+#overlay-rotate {
+  display: none; /* default hidden, JS yang ngatur */
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 99999;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  pointer-events: none; /* biar tidak blok input kalau somehow keliatan */
+}
+ 
+#overlay-rotate.show {
+  display: flex;
+  pointer-events: all; /* blok semua input saat overlay aktif */
+}
+ 
+#overlay-rotate .rotate-icon {
+  font-size: 64px;
+  animation: rotateAnim 2s ease-in-out infinite;
+  display: block;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.85);
+}
+ 
+#overlay-rotate .rotate-text {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.6;
+}
+ 
+@keyframes rotateAnim {
+  0%   { transform: rotate(0deg);   }
+  40%  { transform: rotate(-90deg); }
+  60%  { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg);   }
+}
+ 
+/*  RESPONSIVE: subtitle lebih kecil di layar sempit */
+@media (max-width: 768px) and (orientation: landscape) {
+  #kotak-subtitle {
+    font-size: 13px;
+    padding: 10px 16px;
+    max-width: 240px;
+    border-radius: 12px;
+  }
+ 
+  #btn-subtitle,
+  #btn-nav-camp,
+  #btn-nav-home {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+ 
+  #btn-nav-camp,
+  #btn-nav-home {
+    right: 65px; /* sesuaikan karena tombol mengecil */
+  }
+}

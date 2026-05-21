@@ -13,6 +13,15 @@
   </head>
   <body>
     <div id="splash-screen" style="display: none"></div>
+    <div id="overlay-rotate">
+      <span class="rotate-icon">
+        <i class="fa-sharp fa-solid fa-rotate"></i>
+      </span>
+      <div class="rotate-text">
+        Putar HPnya bang.<br>
+        <small style="opacity:0.6">Biar Maki-nya keliatan penuh :''v</small>
+      </div>
+    </div>
     <button id="btn-nav-home">
       <i class="fa-solid fa-house"></i>
     </button>
@@ -161,9 +170,22 @@
           // Posisi karakter
           function aturPosisi() {
             const skala = app.renderer.height / 1080;
-            maki.scale.set(skala * CONFIG.zoom);
-            maki.x = app.renderer.width / 2;
-            maki.y = app.renderer.height / 2 + CONFIG.geserAtasBawah;
+   
+            const isMobileLandscape = window.innerWidth <= 1024
+              && window.innerWidth > window.innerHeight
+              && navigator.maxTouchPoints > 0;
+   
+            const zoomFinal = isMobileLandscape
+              ? CONFIG.zoom * 1
+              : CONFIG.zoom;
+   
+            const geserFinal = isMobileLandscape
+              ? CONFIG.geserAtasBawah * 0.55
+              : CONFIG.geserAtasBawah;
+   
+            maki.scale.set(skala * zoomFinal);
+            maki.x = app.renderer.width  / 2;
+            maki.y = (app.renderer.height / 2) + geserFinal;
           }
           aturPosisi();
           window.addEventListener("resize", () => {
@@ -196,7 +218,7 @@
               { once: true }
             );
           }
-
+          ui.pasangOverlayRotate();
           //Tombol Navigasi ke Home
           document
             .getElementById("btn-nav-home")

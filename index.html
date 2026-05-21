@@ -14,6 +14,15 @@
     <img src="assets/maki-home/logo.png" id="splash-logo" alt="Logo Game">
     <div id="splash-text">- Click Anywhere to Start -</div>
   </div>
+  <div id="overlay-rotate">
+    <span class="rotate-icon">
+      <i class="fa-sharp fa-solid fa-rotate"></i>
+    </span>
+    <div class="rotate-text">
+      Putar HPnya bang.<br>
+      <small style="opacity:0.6">Biar Maki-nya keliatan penuh :''v</small>
+    </div>
+  </div>
   <button id="btn-nav-camp">
     <i class="fa-solid fa-tent"></i>
   </button>
@@ -121,9 +130,22 @@
       // Posisi karakter
       function aturPosisi() {
         const skala = app.renderer.height / 1080;
-        maki.scale.set(skala * CONFIG.zoom);
+
+        const isMobileLandscape = window.innerWidth <= 1024
+          && window.innerWidth > window.innerHeight
+          && navigator.maxTouchPoints > 0;
+
+        const zoomFinal = isMobileLandscape
+          ? CONFIG.zoom * 1
+          : CONFIG.zoom;
+
+        const geserFinal = isMobileLandscape
+          ? CONFIG.geserAtasBawah * 0.55
+          : CONFIG.geserAtasBawah;
+
+        maki.scale.set(skala * zoomFinal);
         maki.x = app.renderer.width  / 2;
-        maki.y = (app.renderer.height / 2) + CONFIG.geserAtasBawah;
+        maki.y = (app.renderer.height / 2) + geserFinal;
       }
       aturPosisi();
       window.addEventListener("resize", () => {
@@ -133,8 +155,14 @@
 
       // Animasi awal
       maki.stateData.defaultMix = 0.2;
-      maki.state.setAnimation(0, "Start_Idle_01", false);
-      maki.state.addAnimation(0, "Idle_01", true, 0);
+      // Kalau balik dari camp -> langsung intro, skip splash
+      // Kalau pertama kali -> idle dulu, intro jalan saat splash diklik
+      if (sessionStorage.getItem("sudah_masuk")) {
+        maki.state.setAnimation(0, "Start_Idle_01", false);
+        maki.state.addAnimation(0, "Idle_01", true, 0);
+      } else {
+        maki.state.setAnimation(0, "Idle_01", true);
+      }
 
       // UI Bersama
       const ui = buatUI(maki, app, CONFIG);
@@ -162,8 +190,12 @@
         // Kunjungan pertama -> tampilkan splash, set flag saat diklik
         ui.pasangSplash(bgm, true, () => {
           sessionStorage.setItem("sudah_masuk", "1");
+          // Baru jalankan intro saat splash diklik
+          maki.state.setAnimation(0, "Start_Idle_01", false);
+          maki.state.addAnimation(0, "Idle_01", true, 0);
         });
       }
+      ui.pasangOverlayRotate();
       // ── Tombol Navigasi ke Camp ──────────────────────────────
       document.getElementById("btn-nav-camp").addEventListener("pointerdown", (e) => {
         e.stopPropagation();

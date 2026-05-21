@@ -368,6 +368,35 @@ function buatUI(maki, app, config) {
   
       return true;
     }
+
+    function pasangOverlayRotate() {
+      const overlay = document.getElementById("overlay-rotate");
+      if (!overlay) return;
+   
+      function cekOrientasi() {
+        // Portrait = tinggi lebih besar dari lebar
+        const isPortrait = screen.orientation
+          ? screen.orientation.type.startsWith("portrait")
+          : window.innerHeight > window.innerWidth;
+      
+        if (isPortrait) {
+          overlay.classList.add("show");
+        } else {
+          overlay.classList.remove("show");
+        }
+      }
+   
+      // Cek saat pertama load
+      cekOrientasi();
+   
+      // Cek ulang setiap resize / rotate
+      window.addEventListener("resize", cekOrientasi);
+   
+      // API orientasi
+      if (screen.orientation) {
+        screen.orientation.addEventListener("change", cekOrientasi);
+      }
+    }
   
     // Init
     pasangTombolSubtitle();
@@ -376,6 +405,7 @@ function buatUI(maki, app, config) {
       pasangEventCanvas,
       pasangSplash,
       navigasiDenganFade,
+      pasangOverlayRotate,
       resumeBGM,
       tickerUpdate,
       playTalk,
