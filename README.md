@@ -1,4 +1,4 @@
-# Maki Veritas - Interactive Spine Web Viewer
+# Maki Archive - Interactive Spine Web Viewer
 
 Proyek ini lahir dari satu pertanyaan iseng: bisa ga sih karakter Blue Archive ditampilin di browser terus bisa diinteraksi? Ternyata bisa. Tapi jalannya lumayan berliku :''v
 
